@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Любимой буське</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+        body {
+            font-family: 'Pacifico', cursive;
+            background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            overflow-y: auto; 
+            overflow-x: hidden; 
+            position: relative;
+        }
+        .container {
+            padding: 50px;
+            position: relative;
+            z-index: 10;
+        }
+        .header {
+            font-size: 3em;
+            color: #ff66b2;
+            text-shadow: 0 0 15px #ff66b2;
+            background: rgba(255, 255, 255, 0.8); 
+            position: relative;                  
+            z-index: 11;                         
+        }
+        .quiz {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            display: inline-block;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 102, 178, 0.8);
+            color: #333;
+            position: relative;
+            z-index: 3; 
+        }
+        .quiz button {
+            background: linear-gradient(135deg, #f8bbd0, #ffe0e9);
+            color: #333;
+            border: none;
+            padding: 12px 25px;
+            cursor: pointer;
+            border-radius: 30px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            margin: 5px;
+            font-family: inherit;
+        }
+        .quiz button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.25);
+            background: linear-gradient(135deg, #ffe0e9, #f8bbd0);
+        }
+        .image-placeholder {
+            width: 200px;
+            height: 150px;
+            position: absolute;
+            transition: transform 1s ease-in-out;
+            z-index: 2; 
+            border-radius: 20px; 
+            animation: fadeIn 1s ease-in-out;
+        }
+        .heart {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            font-size: 2em;
+            color: red;
+            opacity: 0.8;
+            animation: floatUp 6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            50% { transform: translateY(-50vh) scale(1.2); opacity: 0.8; }
+            100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
+        }
+        @keyframes heartPulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .failure-message {
+            animation: heartPulse 1s infinite;
+        }
+        #img-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+    </style>
+    <script>
+        let currentQuestion = 0;
+        let questions = [
+            {
+                question: "Какая у нас традиция при прощание?",
+                options: [
+                    { text: "Целоваться в носик", correct: false },
+                    { text: "Плакать обнявшись", correct: false },
+                    { text: "Целоваться определенное количество раз", correct: true },
+                    { text: "Кричать на всю улицу смешные слова", correct: false }
+                ]
+            },
+            {
+                question: "Какой цвет машин можем называть только мы с тобой?",
+                options: [
+                    { text: "Красный", correct: true },
+                    { text: "Серо-буро0малиновый", correct: false },
+                    { text: "Цвет детской неожиданости", correct: false },
+                    { text: "Желтый", correct: false }
+                ]
+            },
+            {
+                question: "Что мы первое с тобой вместе посмотрели?",
+                options: [
+                    { text: "Такси", correct: true },
+                    { text: "Достать ножи", correct: false },
+                    { text: "Сериал пацаны", correct: true },
+                    { text: "Сезон охоты", correct: false }
+                ]
+            },
+            {
+                question: "Где впервые ты была взята за попу?",
+                options: [
+                    { text: "Дома в интимной обстановке", correct: false },
+                    { text: "В закрытом парке вечером зимой", correct: true },
+                    { text: "На море", correct: false },
+                    { text: "При знакомстве", correct: false }
+                ]
+            },
+            {
+                question: "Где мы впервые целовались в Москве?",
+                options: [
+                    { text: "В музеи рыбок", correct: false },
+                    { text: "Во вкусно и точка", correct: false },
+                    { text: "На ВДНХ зимой под фонарем", correct: true },
+                    { text: "В метро", correct: false }
+                ]
+            },
+            {
+                question: "Наш первый тик ток?",
+                options: [
+                    { text: "С плеткой", correct: false },
+                    { text: "Меня дома ждет чмок чмок чмок", correct: true },
+                    { text: "Крутой танец", correct: false },
+                    { text: "Тик ток с помадой", correct: false }
+                ]
+            },
+            {
+                question: "Что в тебе самое красивое?",
+                options: [
+                    { text: "Все", correct: true },
+                    { text: "Попа", correct: true },
+                    { text: "Глаза", correct: true },
+                    { text: "Первый вариант", correct: true }
+                ]
+            },
+            {
+                question: "Самое любимое наше занятие?",
+                options: [
+                    { text: "Вкусно поесть вместе", correct: true },
+                    { text: "Лежание на кровати", correct: false },
+                    { text: "Занятие спортом", correct: false },
+                    { text: "Просмотр фильмов", correct: false }
+                ]
+            },
+            {
+                question: "Что тебе больше всего нравится зимой?",
+                options: [
+                    { text: "Лепить снеговиков", correct: false },
+                    { text: "Целоваться в снегу", correct: true },
+                    { text: "Кидаться снижками", correct: false },
+                    { text: "Кататься на коньках", correct: false }
+                ]
+            },
+            {
+                question: "Где в сумме по времени мы целовались больше всего?",
+                options: [
+                    { text: "В парке", correct: false },
+                    { text: "У тебя дома", correct: false },
+                    { text: "У твоего подъезда", correct: true },
+                    { text: "У меня дома", correct: false }
+                ]
+            }
+        ];
+        let images = [];
+        for (let i = 1; i <= 100; i++) {
+            images.push("pictures/img" + i + ".jpg");
+        }
+        
+        function nextQuestion() {
+            if (currentQuestion < questions.length) {
+                let questionText = questions[currentQuestion].question;
+                let options = questions[currentQuestion].options;
+                
+                let buttonsHTML = "";
+                options.forEach(option => {
+                    buttonsHTML += `<button onclick="submitAnswer(${option.correct})">${option.text}</button>`;
+                });
+                
+                document.getElementById("quiz").innerHTML = `<p id="question">${questionText}</p>` + buttonsHTML;
+                currentQuestion++;
+                shuffleImages();
+            } else {
+                document.getElementById("quiz").innerHTML = "<h2>Люблю тебя, зайка!❤️❤️❤️❤️❤️</h2><video width='640' height='480' controls><source src='video.mp4' type='video/mp4'>Ваш браузер не поддерживает видео.</video><div style='margin-top:20px; font-size:1.2em; color:#333;'>Моя дорогая буська, с Днем Святого Валентина! Ты — мое солнышко, которое освещает каждый мой день. Я так люблю тебя, и каждое мгновение рядом с тобой для меня — настоящее счастье. Пусть этот день будет полон любви и тепла, как и ты, моя любимая! ❤️</div>";
+            }
+        }
+        
+        function isOverlap(r1, r2) {
+            return !(r1.right < r2.left || r1.left > r2.right || r1.bottom < r2.top || r1.top > r2.bottom);
+        }
+        
+        function shuffleImages() {
+            let container = document.getElementById("img-container");
+            let imageElements = container.querySelectorAll(".image-placeholder");
+            let placedRects = [];
+            let shuffledSources = images.slice();
+            for (let i = shuffledSources.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                [shuffledSources[i], shuffledSources[j]] = [shuffledSources[j], shuffledSources[i]];
+            }
+            let usedSources = new Set();
+            imageElements.forEach((img, index) => {
+                let attempt = 0;
+                let maxAttempts = 50;
+                let posX, posY, newRect;
+                do {
+                    posX = Math.random() * (container.clientWidth - 200);
+                    posY = Math.random() * (container.clientHeight - 150);
+                    newRect = { left: posX, top: posY, right: posX + 200, bottom: posY + 150 };
+                    attempt++;
+                } while (placedRects.some(r => isOverlap(r, newRect)) && attempt < maxAttempts);
+                placedRects.push(newRect);
+                img.style.left = posX + "px";
+                img.style.top = posY + "px";
+                let src = shuffledSources[index];
+                if (usedSources.has(src)) {
+                    for (let candidate of shuffledSources) {
+                        if (!usedSources.has(candidate)) {
+                            src = candidate;
+                            break;
+                        }
+                    }
+                }
+                usedSources.add(src);
+                img.src = src;
+            });
+        }
+        
+        function submitAnswer(isCorrect) {
+            let quizElement = document.getElementById("quiz");
+            if(isCorrect) {
+                quizElement.innerHTML = "<p style='color: deeppink; font-weight: bold; font-size: 1.5em; text-shadow: 1px 1px 2px #ff66b2;'>Верно, моя любовь!</p><button onclick='nextQuestion()'>Далее</button>";
+            } else {
+                quizElement.innerHTML = "<p style='color: #ff3366; font-weight: bold; font-size: 1.5em; text-shadow: 1px 1px 2px #ff66b2;'>Ой, милый зайчик, это не точно – попробуй ещё раз!</p><button onclick='restartQuiz()'>Начать заново</button>";
+                currentQuestion = 0;
+            }
+        }
+        
+        function playSound() {
+            let audio = new Audio('sound.mp3'); 
+            audio.currentTime = 0;
+            audio.play();
+        }
+        
+        function generateHearts() {
+            setInterval(() => {
+                let heart = document.createElement("div");
+                heart.className = "heart";
+                heart.innerHTML = "❤️";
+                heart.style.left = Math.random() * window.innerWidth + "px";
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 6000);
+            }, 800);
+        }
+        
+        function restartQuiz() {
+            nextQuestion();
+        }
+        
+        window.onload = function() {
+            nextQuestion();
+            generateHearts();
+            shuffleImages();
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">С Днём Святого Валентина!</div>
+        <div id="quiz" class="quiz">
+        </div>
+        <div id="img-container"></div>
+    </div>
+    <script>
+        let container = document.getElementById("img-container");
+        for (let i = 0; i < 25; i++) {
+            let img = document.createElement("img");
+            img.className = "image-placeholder";
+            img.addEventListener("click", playSound);
+            img.addEventListener("mousemove", function(e) {
+                let heart = document.createElement("div");
+                heart.innerHTML = "❤️";
+                heart.style.position = "absolute";
+                heart.style.left = e.pageX + "px";
+                heart.style.top = e.pageY + "px";
+                heart.style.pointerEvents = "none";
+                heart.style.transition = "opacity 0.5s";
+                document.body.appendChild(heart);
+                setTimeout(() => {
+                    heart.style.opacity = "0";
+                    setTimeout(() => heart.remove(), 500);
+                }, 100);
+            });
+            container.appendChild(img);
+        }
+    </script>
+</body>
+</html>
